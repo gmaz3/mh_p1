@@ -15,8 +15,8 @@ int main()
 
     maximumDiversityProblem gd;
 
-    gd.readData("MDG-a_1_n500_m50.txt");
-    // gd.readDistances("matrix.txt");
+    gd.readData("datos/MDG-a_1_n500_m50.txt");
+    // gd.readData("datos/matrix.txt");
 
     auto sol = gd.findGreedySolution();
 
@@ -60,6 +60,7 @@ void maximumDiversityProblem::readData(string path)
     while(!file.eof()){
       file >> i >> j >> value;
       distances[i][j] = value;
+      distances[j][i] = value; // Matriz simetrica pq es mas sencillo medir distancias
     }
 
     // //Mostrar matriz de distancias
@@ -69,6 +70,7 @@ void maximumDiversityProblem::readData(string path)
     //   }
     //   cout << endl;
     // }
+    //   cout << endl;
 
     file.close();
 }
@@ -84,13 +86,8 @@ set<int> maximumDiversityProblem::findGreedySolution()
       for(int i=0; i<n; i++){
           double cum_distance = 0;
           //Calculamos la distancia acumulada
-          //Acumulada en la fila
-          for(int j=i+1; j<n; j++){
+          for(int j=0; j<n; j++){
               cum_distance += distances[i][j];
-          }
-          //Acumulada en la columna
-          for(int j=0; j<i; j++){
-              cum_distance += distances[j][i];
           }
 
           if(cum_distance > max_cum_dist){
@@ -107,25 +104,16 @@ set<int> maximumDiversityProblem::findGreedySolution()
           item_idx = -1;
           double max_dist = -1;
 
-          //Recorremos todos los elementos que no estan selecionados
+          //Recorremos todos los elementos del conjunto principal
           for(int i = 0; i<n; i++){
               double distance = MAX;
-              //Si i no esta seleccionado
+              //Si i no esta en seleccionados
               if(solution.find(i) == solution.end()){
                   auto it = solution.begin();
-                  //Nos quedamos con la distancia minima a los elementos de sel
+                  //Nos quedamos con la distancia mas pequena de i a los elementos de seleccionados
                   for(it; it!=solution.end(); it++){
-                      double current_distance;
-
-                      //La matriz es triangular
-                      if(*it < i){
-                          current_distance = distances[*it][i];
-                      }else{
-                          current_distance = distances[i][*it];
-                      }
-
-                      if(current_distance < distance){
-                          distance = current_distance;
+                      if(distances[i][*it] < distance){
+                          distance = distances[i][*it];
                       }
                   }
 

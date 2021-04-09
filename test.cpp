@@ -6,14 +6,7 @@
 
 using namespace std;
 
-int main(){
-  cout << "Test para greedy\n" << endl;
-
-  srand(time(NULL));
-
-  for(int i=0; i<15; i++){
-      cout << rand()%10 << endl;
-  }
-
-  return 0;
+int main(int argc, char const *argv[]) {
+    cout << argv[0] << endl;
+    return 0;
 }

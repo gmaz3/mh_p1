@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-// #include "mdp.h"
-
 #define MAX 100000
 
 using namespace std;
@@ -15,19 +13,26 @@ using namespace std;
 class maximumDiversityProblem
 {
     private:
-    //Matriz de distancias
+    //Matriz de distancias (simetrica para trabajar sin complicaciones)
     vector<vector<double>> distances;
+
     //Tamanio del conjunto de los datos
     int n;
-    //Conjunto solucion
+
+    //Conjunto solucion o seleccionados
     set<int> solution;
+
     //Numero de elementos que tenemos que escoger del conjunto para generar la solucion
     int m;
 
-    //Valor de la solucion actual: Se usa para calcular solucion factorizada
+    //Valor de la diversidad de la solucion actual: Se usa para calcular solucion factorizada
     double solutionValue;
 
+    //Devulve un vector con las soluciones ordenadas por su aportacion
+    vector<int> sortSolution();
+
     public:
+
     //Constructor por defecto
     maximumDiversityProblem();
 
@@ -37,45 +42,32 @@ class maximumDiversityProblem
     //Encuentra la solucion por Busqueda Local
     set<int> findLocalSearchSolution();
 
-    //Devulve un vector con las soluciones ordenadas por su aportacion
-    vector<int> sortSolution();
-
     //Devuelve la contribucion (o suma acumulada de distancias) del elemento i a los elementos del conjunto sol
     double getContribution(int i, set<int> set);
 
+    // Calcula la diversidad entre los elementos seleccionados con el metodo del MaxSum
     double evaluation();
-
 };
 
 int main()
 {
+    cout << "Test para BL\n" << endl;
 
     srand(time(NULL));
 
-    cout << "Test para BL\n" << endl;
-
     maximumDiversityProblem gd;
 
-    gd.readData("datos/matrix.txt");
-    // gd.readData("datos/MDG-a_1_n500_m50.txt");
+    gd.readData("datos/MDG-a_1_n500_m50.txt");
 
     auto sol = gd.findLocalSearchSolution();
 
-    // auto it = sol.begin();
-
     cout << "La solucion tiene valor de: " << gd.evaluation() << endl;
-
-    // for(it; it!=sol.end(); it++){
-    //     cout << *it + 1 << endl;
-    // }
-
-    cout << "final" << endl;
 
     return 0;
 }
 
 
-maximumDiversityProblem::maximumDiversityProblem():n(0), m(0)
+maximumDiversityProblem::maximumDiversityProblem():n(0), m(0), solutionValue(-1.0)
 {
 }
 
@@ -90,16 +82,16 @@ void maximumDiversityProblem::readData(string path)
     //Inicializamos la matriz a 0
     distances.resize(n);
 
+    //Llenamos la matriz de distancias de 0
     int zeros[n] = {0};
-
     for(int i=0; i < n; i++){
         distances[i] = vector<double>(zeros,zeros+n);
     }
 
-    //Leemos el fichero completo e introducimos los valores a la matriz
     int i, j;
     double value;
 
+    //Leemos el fichero completo e introducimos los valores a la matriz
     while(!file.eof()){
         file >> i >> j >> value;
         distances[i][j] = value;
@@ -118,13 +110,14 @@ set<int> maximumDiversityProblem::findLocalSearchSolution()
           solution.insert(rand()%n);
       }
 
+      // La valoracion de la solucion de la que partimos
       solutionValue = evaluation();
-
 
       bool isEnd = false;
       int iterations = 0;
       int maxIter = 100000;
 
+      // Bucle que finaliza en caso de que llegamos al maximo de iteraciones o se recorre todos los vecinos sin encontrar solucion mejor
       while(!isEnd){
           // sorted es un vector con los elementos de selecionados ordenados por su contribucion
           vector<int> sorted = sortSolution();
@@ -171,7 +164,7 @@ set<int> maximumDiversityProblem::findLocalSearchSolution()
               isEnd = i == sorted.size() || iterations > maxIter;
           }
 
-          // Si ha mejora la solucion hace el intercambio y actualiza el valor de la solucion actual sin recalcular todo
+          // Si hay mejora la solucion hace el intercambio en seleccionados y actualiza el valor de la solucion actual sin recalcular todo
           if(hasImproved){
               solution.erase(item2pull);
               solution.insert(item2push);
@@ -215,7 +208,7 @@ vector<int> maximumDiversityProblem::sortSolution()
 
     auto it = solution.begin();
 
-    // Calcula las distancias de cada elemento de seleccionados al resto en un vector
+    // Calcula las distancias (contribucion en la diversidad) de cada elemento de seleccionados al resto en un vector
     for(it; it != solution.end(); it++){
         set_distances.push_back(getContribution(*it,solution));
     }
@@ -223,7 +216,7 @@ vector<int> maximumDiversityProblem::sortSolution()
     int lower_idx;
     double lower_dis;
 
-    // Ordenamos selecionados por orden de menor contribucion
+    // Ordenamos selecionados por orden de menor contribucion usando el vector anterior
     for(int i=0; i<m; i++){
         int idx = i;
         for(int j=i; j<m; j++){

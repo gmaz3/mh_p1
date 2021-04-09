@@ -1,36 +1,68 @@
+/*  Autor: Juan Miguel Gomez
+    Compilar: g++ -O2 -o greedy greedy.cpp
+    Ejecutar: ./greedy datos/file.txt
+*/
 #include <iostream>
 #include <fstream>
 #include <set>
 #include <vector>
-
-#include "mdp.h"
+#include <chrono>
 
 #define MAX 100000
 
 using namespace std;
+using namespace std::chrono;
 
-int main()
+class maximumDiversityProblem
 {
-    cout << "Test para greedy\n" << endl;
+    private:
+    //Matriz de distancias
+    vector<vector<double>> distances;
+    //Tamanio del conjunto de los datos
+    int n;
+    //Conjunto solucion
+    set<int> solution;
+    //Numero de elementos que tenemos que escoger del conjunto para generar la solucion
+    int m;
 
+    public:
+    //Constructor por defecto
+    maximumDiversityProblem();
+
+    //Lee los datos del problema
+    void readData(string path);
+
+
+    set<int> findGreedySolution();
+
+    double evaluation();
+
+};
+
+int main(int argc, char const *argv[])
+{
+    if(argc < 2){
+        cout << "Error: Numero de argumentos invalido" << endl;
+        return -1;
+    }
+
+    srand(time(NULL));
+
+    // Declaramos el tipo y hacemos que lea los datos
     maximumDiversityProblem gd;
+    gd.readData(argv[1]);
 
-    gd.readData("datos/MDG-a_1_n500_m50.txt");
-    // gd.readData("datos/matrix.txt");
+    // Cronometramos el tiempo en ms
+    auto start = high_resolution_clock::now();
+    gd.findGreedySolution();
+    auto stop = high_resolution_clock::now();
 
-    auto sol = gd.findGreedySolution();
+    auto duration = duration_cast<microseconds>(stop - start);
 
-    auto it = sol.begin();
-
-    cout << "La solucion tiene valor de: " << gd.evaluation() << endl;
-
-    // for(it; it!=sol.end(); it++){
-    //     cout << *it + 1 << endl;
-    // }
+    cout << gd.evaluation() << "\t" << duration.count() << endl;
 
     return 0;
 }
-
 
 maximumDiversityProblem::maximumDiversityProblem():n(0), m(0)
 {

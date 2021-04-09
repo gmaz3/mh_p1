@@ -1,7 +1,12 @@
+/*  Autor: Juan Miguel Gomez
+    Compilar: g++ -O2 -o localsearch localsearch.cpp
+    Ejecutar: ./localsearch datos/file.txt
+*/
 #include <iostream>
 #include <fstream>
 #include <set>
 #include <vector>
+#include <chrono>
 
 #include <stdlib.h>
 #include <time.h>
@@ -9,6 +14,7 @@
 #define MAX 100000
 
 using namespace std;
+using namespace std::chrono;
 
 class maximumDiversityProblem
 {
@@ -49,22 +55,32 @@ class maximumDiversityProblem
     double evaluation();
 };
 
-int main()
+int main(int argc, char const *argv[])
 {
-    cout << "Test para BL\n" << endl;
+    if(argc < 2){
+        cout << "Error: Numero de argumentos invalido" << endl;
+        return -1;
+    }
 
     srand(time(NULL));
 
+    // Declaramos el tipo y hacemos que lea los datos
     maximumDiversityProblem gd;
+    gd.readData(argv[1]);
 
-    gd.readData("datos/MDG-a_1_n500_m50.txt");
+    // Cronometramos el tiempo en ms
+    auto start = high_resolution_clock::now();
+    gd.findLocalSearchSolution();
+    auto stop = high_resolution_clock::now();
 
-    auto sol = gd.findLocalSearchSolution();
+    auto duration = duration_cast<microseconds>(stop - start);
 
-    cout << "La solucion tiene valor de: " << gd.evaluation() << endl;
+    cout << gd.evaluation() << "\t" << duration.count() << endl;
+
 
     return 0;
 }
+
 
 
 maximumDiversityProblem::maximumDiversityProblem():n(0), m(0), solutionValue(-1.0)

@@ -24,9 +24,9 @@ int main()
 
     cout << "La solucion tiene valor de: " << gd.evaluation() << endl;
 
-    for(it; it!=sol.end(); it++){
-        cout << *it + 1 << endl;
-    }
+    // for(it; it!=sol.end(); it++){
+    //     cout << *it + 1 << endl;
+    // }
 
     return 0;
 }
@@ -58,9 +58,9 @@ void maximumDiversityProblem::readData(string path)
     double value;
 
     while(!file.eof()){
-      file >> i >> j >> value;
-      distances[i][j] = value;
-      distances[j][i] = value; // Matriz simetrica pq es mas sencillo medir distancias
+        file >> i >> j >> value;
+        distances[i][j] = value;
+        distances[j][i] = value; // Matriz simetrica pq es mas sencillo medir distancias
     }
 
     // //Mostrar matriz de distancias
